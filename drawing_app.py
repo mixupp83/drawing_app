@@ -16,6 +16,7 @@ class DrawingApp:
         self.last_x, self.last_y = None, None
         self.pen_color = 'black'
         self.brush_size = 1  # Изначальный размер кисти
+        self.previous_color = self.pen_color  # Сохраняем предыдущий цвет
 
         self.setup_ui()
 
@@ -34,6 +35,10 @@ class DrawingApp:
 
         save_button = tk.Button(control_frame, text="Сохранить", command=self.save_image)
         save_button.pack(side=tk.LEFT)
+
+        # Кнопка для переключения на ластик
+        eraser_button = tk.Button(control_frame, text="Ластик", command=self.toggle_eraser)
+        eraser_button.pack(side=tk.LEFT)
 
         # Выпадающий список для выбора размера кисти
         self.brush_size_var = tk.IntVar(value=self.brush_size)
@@ -61,6 +66,7 @@ class DrawingApp:
         self.draw = ImageDraw.Draw(self.image)
 
     def choose_color(self):
+        self.previous_color = self.pen_color  # Сохраняем текущий цвет
         self.pen_color = colorchooser.askcolor(color=self.pen_color)[1]
 
     def save_image(self):
@@ -73,6 +79,15 @@ class DrawingApp:
 
     def update_brush_size(self, size):
         self.brush_size = int(size)
+
+    def toggle_eraser(self):
+        if self.pen_color == "white":
+            # Возвращаем предыдущий цвет
+            self.pen_color = self.previous_color
+        else:
+            # Сохраняем текущий цвет и переключаем на ластик
+            self.previous_color = self.pen_color
+            self.pen_color = "white"
 
 def main():
     root = tk.Tk()
