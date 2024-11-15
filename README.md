@@ -7,6 +7,7 @@
 * __Рисование на холсте:__ Пользователи могут рисовать на белом холсте с помощью мыши.
 * __Выбор цвета:__ Возможность выбора цвета кисти с помощью стандартного диалогового окна.
 * __Выбор размера кисти:__ Пользователи могут выбирать размер кисти из выпадающего списка.
+* __Инструмент "Ластик"__ Возможность использовать ластик для удаления нарисованных элементов.
 * __Очистка холста:__ Кнопка для очистки всего холста.
 * __Сохранение изображения:__ Возможность сохранения нарисованного изображения в формате PNG.
 
@@ -34,8 +35,10 @@ python drawing_app.py
 1. __Рисование:__ Нажмите левую кнопку мыши и перемещайте курсор по холсту для рисования.
 2. __Выбор цвета:__ Нажмите кнопку "Выбрать цвет", чтобы открыть диалоговое окно выбора цвета.
 3. __Выбор размера кисти:__ Используйте выпадающий список для выбора размера кисти.
-4. __Очистка холста:__ Нажмите кнопку "Очистить", чтобы удалить все нарисованное.
-5. __Сохранение изображения:__ Нажмите кнопку "Сохранить", чтобы сохранить текущее изображение
+4. __Инструмент "Ластик":__ Нажмите кнопку "Ластик", чтобы переключиться на инструмент ластика. При использовании ластика 
+цвет кисти становится белым, что позволяет удалять нарисованные элементы.
+5. __Очистка холста:__ Нажмите кнопку "Очистить", чтобы удалить все нарисованное.
+6. __Сохранение изображения:__ Нажмите кнопку "Сохранить", чтобы сохранить текущее изображение
 в формате PNG.
 
 ## Структура проекта
@@ -44,7 +47,6 @@ python drawing_app.py
 
 ### Пример кода
 ```python
-
 import tkinter as tk
 from tkinter import colorchooser, filedialog, messagebox
 from PIL import Image, ImageDraw
@@ -63,6 +65,7 @@ class DrawingApp:
         self.last_x, self.last_y = None, None
         self.pen_color = 'black'
         self.brush_size = 1  # Изначальный размер кисти
+        self.previous_color = self.pen_color  # Сохраняем предыдущий цвет
 
         self.setup_ui()
 
@@ -81,6 +84,10 @@ class DrawingApp:
 
         save_button = tk.Button(control_frame, text="Сохранить", command=self.save_image)
         save_button.pack(side=tk.LEFT)
+
+        # Кнопка для переключения на ластик
+        eraser_button = tk.Button(control_frame, text="Ластик", command=self.toggle_eraser)
+        eraser_button.pack(side=tk.LEFT)
 
         # Выпадающий список для выбора размера кисти
         self.brush_size_var = tk.IntVar(value=self.brush_size)
@@ -108,6 +115,7 @@ class DrawingApp:
         self.draw = ImageDraw.Draw(self.image)
 
     def choose_color(self):
+        self.previous_color = self.pen_color  # Сохраняем текущий цвет
         self.pen_color = colorchooser.askcolor(color=self.pen_color)[1]
 
     def save_image(self):
@@ -120,6 +128,15 @@ class DrawingApp:
 
     def update_brush_size(self, size):
         self.brush_size = int(size)
+
+    def toggle_eraser(self):
+        if self.pen_color == "white":
+            # Возвращаем предыдущий цвет
+            self.pen_color = self.previous_color
+        else:
+            # Сохраняем текущий цвет и переключаем на ластик
+            self.previous_color = self.pen_color
+            self.pen_color = "white"
 
 def main():
     root = tk.Tk()
