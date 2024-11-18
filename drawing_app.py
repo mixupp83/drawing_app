@@ -22,6 +22,7 @@ class DrawingApp:
 
         self.canvas.bind('<B1-Motion>', self.paint)
         self.canvas.bind('<ButtonRelease-1>', self.reset)
+        self.canvas.bind('<Button-3>', self.pick_color)  # Привязка события для пипетки
 
     def setup_ui(self):
         control_frame = tk.Frame(self.root)
@@ -88,6 +89,12 @@ class DrawingApp:
             # Сохраняем текущий цвет и переключаем на ластик
             self.previous_color = self.pen_color
             self.pen_color = "white"
+
+    def pick_color(self, event):
+        x = event.x
+        y = event.y
+        color = self.image.getpixel((x, y))  # Получаем цвет пикселя
+        self.pen_color = '#%02x%02x%02x' % color  # Преобразуем цвет в формат HEX
 
 def main():
     root = tk.Tk()
