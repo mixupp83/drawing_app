@@ -12,6 +12,7 @@
 * __Горячие клавиши__:
   - `Ctrl+S`: Сохранение изображения.
   - `Ctrl+C`: Выбор цвета.
+* __Предварительный просмотр цвета кисти__: Маленький холст, показывающий текущий цвет кисти.
 * __Очистка холста:__ Кнопка для очистки всего холста.
 * __Сохранение изображения:__ Возможность сохранения нарисованного изображения в формате PNG.
 
@@ -45,8 +46,9 @@ python drawing_app.py
 6. __Горячие клавиши:__
     * Ctrl+S: Сохранение изображения.
     * Ctrl+C: Выбор цвета.
-7. __Очистка холста:__ Нажмите кнопку "Очистить", чтобы удалить все нарисованное.
-8. __Сохранение изображения:__ Нажмите кнопку "Сохранить", чтобы сохранить текущее изображение
+7. __Предварительный просмотр цвета кисти:__ Маленький холст, показывающий текущий цвет кисти.
+8. __Очистка холста:__ Нажмите кнопку "Очистить", чтобы удалить все нарисованное.
+9. __Сохранение изображения:__ Нажмите кнопку "Сохранить", чтобы сохранить текущее изображение
 в формате PNG.
 
 ## Структура проекта
@@ -108,6 +110,10 @@ class DrawingApp:
         brush_size_menu = tk.OptionMenu(control_frame, self.brush_size_var, *sizes, command=self.update_brush_size)
         brush_size_menu.pack(side=tk.LEFT)
 
+        # Предварительный просмотр цвета кисти
+        self.color_preview = tk.Canvas(control_frame, width=30, height=30, bg=self.pen_color)
+        self.color_preview.pack(side=tk.LEFT, padx=5)
+
     def paint(self, event):
         if self.last_x and self.last_y:
             self.canvas.create_line(self.last_x, self.last_y, event.x, event.y,
@@ -130,6 +136,7 @@ class DrawingApp:
     def choose_color(self, event=None):
         self.previous_color = self.pen_color  # Сохраняем текущий цвет
         self.pen_color = colorchooser.askcolor(color=self.pen_color)[1]
+        self.update_color_preview()  # Обновляем предварительный просмотр цвета
 
     def save_image(self, event=None):
         file_path = filedialog.asksaveasfilename(filetypes=[('PNG files', '*.png')])
@@ -150,12 +157,17 @@ class DrawingApp:
             # Сохраняем текущий цвет и переключаем на ластик
             self.previous_color = self.pen_color
             self.pen_color = "white"
+        self.update_color_preview()  # Обновляем предварительный просмотр цвета
 
     def pick_color(self, event):
         x = event.x
         y = event.y
         color = self.image.getpixel((x, y))  # Получаем цвет пикселя
         self.pen_color = '#%02x%02x%02x' % color  # Преобразуем цвет в формат HEX
+        self.update_color_preview()  # Обновляем предварительный просмотр цвета
+
+    def update_color_preview(self):
+        self.color_preview.config(bg=self.pen_color)
 
 def main():
     root = tk.Tk()
