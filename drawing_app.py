@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import colorchooser, filedialog, messagebox
+from tkinter import colorchooser, filedialog, messagebox, simpledialog
 from PIL import Image, ImageDraw
 
 class DrawingApp:
@@ -55,6 +55,10 @@ class DrawingApp:
         self.color_preview = tk.Canvas(control_frame, width=30, height=30, bg=self.pen_color)
         self.color_preview.pack(side=tk.LEFT, padx=5)
 
+        # Кнопка для изменения размера холста
+        resize_button = tk.Button(control_frame, text="Изменить размер холста", command=self.resize_canvas)
+        resize_button.pack(side=tk.LEFT)
+
     def paint(self, event):
         if self.last_x and self.last_y:
             self.canvas.create_line(self.last_x, self.last_y, event.x, event.y,
@@ -109,6 +113,14 @@ class DrawingApp:
 
     def update_color_preview(self):
         self.color_preview.config(bg=self.pen_color)
+
+    def resize_canvas(self):
+        width = simpledialog.askinteger("Изменить размер холста", "Введите ширину:", minvalue=1, maxvalue=2000)
+        height = simpledialog.askinteger("Изменить размер холста", "Введите высоту:", minvalue=1, maxvalue=2000)
+        if width and height:
+            self.canvas.config(width=width, height=height)
+            self.image = Image.new("RGB", (width, height), "white")
+            self.draw = ImageDraw.Draw(self.image)
 
 def main():
     root = tk.Tk()
