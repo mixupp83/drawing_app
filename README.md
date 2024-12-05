@@ -4,18 +4,20 @@
 изображениями.
 
 ## Особенности
-* __Рисование на холсте:__ Пользователи могут рисовать на белом холсте с помощью мыши.
-* __Выбор цвета:__ Возможность выбора цвета кисти с помощью стандартного диалогового окна.
-* __Выбор размера кисти:__ Пользователи могут выбирать размер кисти из выпадающего списка.
-* __Инструмент "Ластик":__ Возможность использовать ластик для удаления нарисованных элементов.
-* __Инструмент "Пипетка"__: Возможность выбирать цвет с холста, нажимая правую кнопку мыши.
-* __Горячие клавиши__:
+- **Рисование на холсте**: Пользователи могут рисовать на белом холсте с помощью мыши.
+- **Выбор цвета**: Возможность выбора цвета кисти с помощью стандартного диалогового окна.
+- **Выбор размера кисти**: Пользователи могут выбирать размер кисти из выпадающего списка.
+- **Инструмент "Ластик"**: Возможность использовать ластик для удаления нарисованных элементов.
+- **Инструмент "Пипетка"**: Возможность выбирать цвет с холста, нажимая правую кнопку мыши.
+- **Горячие клавиши**:
   - `Ctrl+S`: Сохранение изображения.
   - `Ctrl+C`: Выбор цвета.
-* __Предварительный просмотр цвета кисти__: Маленький холст, показывающий текущий цвет кисти.
-* __Изменение размера холста__: Возможность изменить размер холста с помощью диалогового окна.
-* __Очистка холста:__ Кнопка для очистки всего холста.
-* __Сохранение изображения:__ Возможность сохранения нарисованного изображения в формате PNG.
+- **Предварительный просмотр цвета кисти**: Маленький холст, показывающий текущий цвет кисти.
+- **Изменение размера холста**: Возможность изменить размер холста с помощью диалогового окна.
+- **Инструмент "Текст"**: Возможность добавлять текст на холст.
+- **Изменение цвета фона холста**: Возможность изменить цвет фона холста.
+- **Очистка холста**: Кнопка для очистки всего холста.
+- **Сохранение изображения**: Возможность сохранения нарисованного изображения в формате PNG.
 
 ## Установка и запуск
 ### Требования
@@ -48,7 +50,8 @@ python drawing_app.py
     * Ctrl+S: Сохранение изображения.
     * Ctrl+C: Выбор цвета.
 7. __Предварительный просмотр цвета кисти:__ Маленький холст, показывающий текущий цвет кисти.
-8. Изменение размера холста: Нажмите кнопку "Изменить размер холста", чтобы открыть диалоговое окно для ввода новых размеров.
+8. __Изменение размера холста:__ Нажмите кнопку "Изменить размер холста", чтобы открыть диалоговое окно для ввода новых размеров.
+9. __Инструмент "Текст":__ Нажмите кнопку "Текст", чтобы ввести текст и раз
 9. __Очистка холста:__ Нажмите кнопку "Очистить", чтобы удалить все нарисованное.
 10. __Сохранение изображения:__ Нажмите кнопку "Сохранить", чтобы сохранить текущее изображение
 в формате PNG.
@@ -61,7 +64,7 @@ python drawing_app.py
 ```python
 import tkinter as tk
 from tkinter import colorchooser, filedialog, messagebox, simpledialog
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageFont
 
 class DrawingApp:
     def __init__(self, root):
@@ -78,12 +81,14 @@ class DrawingApp:
         self.pen_color = 'black'
         self.brush_size = 1  # Изначальный размер кисти
         self.previous_color = self.pen_color  # Сохраняем предыдущий цвет
+        self.text_mode = False  # Флаг для режима текста
 
         self.setup_ui()
 
         self.canvas.bind('<B1-Motion>', self.paint)
         self.canvas.bind('<ButtonRelease-1>', self.reset)
         self.canvas.bind('<Button-3>', self.pick_color)  # Привязка события для пипетки
+        self.canvas.bind('<Button-1>', self.place_text)  # Привязка события для размещения текста
 
         # Привязка горячих клавиш
         self.root.bind('<Control-s>', self.save_image)
@@ -119,6 +124,14 @@ class DrawingApp:
         # Кнопка для изменения размера холста
         resize_button = tk.Button(control_frame, text="Изменить размер холста", command=self.resize_canvas)
         resize_button.pack(side=tk.LEFT)
+
+        # Кнопка для добавления текста
+        text_button = tk.Button(control_frame, text="Текст", command=self.enter_text_mode)
+        text_button.pack(side=tk.LEFT)
+
+        # Кнопка для изменения цвета фона
+        change_bg_button = tk.Button(control_frame, text="Изменить фон", command=self.change_background_color)
+        change_bg_button.pack(side=tk.LEFT)
 
     def paint(self, event):
         if self.last_x and self.last_y:
@@ -181,6 +194,27 @@ class DrawingApp:
         if width and height:
             self.canvas.config(width=width, height=height)
             self.image = Image.new("RGB", (width, height), "white")
+            self.draw = ImageDraw.Draw(self.image)
+
+    def enter_text_mode(self):
+        self.text_mode = True
+        self.text = simpledialog.askstring("Введите текст", "Введите текст:")
+        if self.text:
+            self.canvas.bind('<Button-1>', self.place_text)
+
+    def place_text(self, event):
+        if self.text_mode and self.text:
+            x, y = event.x, event.y
+            self.canvas.create_text(x, y, text=self.text, fill=self.pen_color, font=("Arial", 12))
+            self.draw.text((x, y), self.text, fill=self.pen_color, font=ImageFont.truetype("arial.ttf", 12))
+            self.text_mode = False
+            self.canvas.unbind('<Button-1>')
+
+    def change_background_color(self):
+        new_color = colorchooser.askcolor()[1]
+        if new_color:
+            self.canvas.config(background=new_color)
+            self.image = Image.new("RGB", (self.canvas.winfo_width(), self.canvas.winfo_height()), new_color)
             self.draw = ImageDraw.Draw(self.image)
 
 def main():
